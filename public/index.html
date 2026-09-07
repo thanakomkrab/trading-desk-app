@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trading Desk — ทีมเทรด AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#10151f;
+    --surface:#1a2233;
+    --surface-alt:#212c42;
+    --border:#2d3b56;
+    --text:#edeff4;
+    --text-muted:#9aa5bc;
+    --gold:#c6a15b;
+    --gold-dim:#8a763f;
+    --teal:#5fa8a3;
+    --up:#6fa287;
+    --down:#c4685c;
+    --radius-lg:14px;
+    --radius-sm:8px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 15% 0%, rgba(198,161,91,0.06), transparent 45%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:920px;
+    margin:0 auto;
+    padding:32px 20px 80px;
+  }
+  header.page-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:28px;
+    flex-wrap:wrap;
+  }
+  .brand{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:26px;
+    letter-spacing:-0.01em;
+  }
+  .brand span{color:var(--gold);}
+  .page-head p{
+    margin:4px 0 0;
+    color:var(--text-muted);
+    font-size:14px;
+    max-width:38ch;
+  }
+  .clock{
+    font-variant-numeric:tabular-nums;
+    color:var(--text-muted);
+    font-size:13px;
+    text-align:right;
+  }
+
+  /* pinned CEO memo */
+  .memo{
+    position:relative;
+    background:linear-gradient(180deg, var(--surface-alt), var(--surface));
+    border:1px solid var(--border);
+    border-left:3px solid var(--gold);
+    border-radius:var(--radius-lg);
+    padding:20px 22px;
+    margin-bottom:36px;
+    transition:transform .5s ease, opacity .5s ease;
+  }
+  .memo.enter{opacity:0; transform:translateY(-8px);}
+  .memo-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:10px;
+  }
+  .memo-tag{
+    font-size:12px;
+    color:var(--gold);
+    font-weight:600;
+  }
+  .memo-time{
+    font-size:12px;
+    color:var(--text-muted);
+    font-variant-numeric:tabular-nums;
+  }
+  .memo h2{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:22px;
+    margin:0 0 8px;
+    line-height:1.3;
+  }
+  .memo p.body{
+    margin:0 0 14px;
+    color:#c9cedd;
+    font-size:15px;
+    max-width:60ch;
+  }
+  .memo .pair{
+    font-variant-numeric:tabular-nums;
+    font-weight:600;
+  }
+  .memo-sources{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .src-chip{
+    font-size:12px;
+    color:var(--text-muted);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:4px 10px;
+  }
+
+  /* org chart */
+  .org{
+    margin-bottom:40px;
+  }
+  .org h3, .feed h3, .command h3{
+    font-size:13px;
+    color:var(--text-muted);
+    font-weight:600;
+    margin:0 0 18px;
+  }
+  .ceo-card{
+    background:var(--surface-alt);
+    border:1px solid var(--gold-dim);
+    border-radius:var(--radius-lg);
+    padding:18px 22px;
+    max-width:420px;
+    margin:0 auto 0;
+    text-align:center;
+    position:relative;
+    z-index:2;
+  }
+  .ceo-card .role{
+    font-family:'Fraunces',serif;
+    font-size:19px;
+    font-weight:500;
+  }
+  .ceo-card .desc{
+    font-size:13px;
+    color:var(--text-muted);
+    margin-top:4px;
+  }
+  .connector{
+    width:1px;
+    height:26px;
+    background:var(--border);
+    margin:0 auto;
+  }
+  .connector-h{
+    height:1px;
+    background:var(--border);
+    position:relative;
+    max-width:640px;
+    margin:0 auto;
+  }
+  .agents-row{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:14px;
+    max-width:800px;
+    margin:0 auto;
+  }
+  .agent-branch{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .agent-branch .connector{height:18px;}
+  .agent-card{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:12px 10px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .agent-card:hover{border-color:var(--teal);}
+  .agent-card .role{
+    font-size:12.5px;
+    font-weight:600;
+    line-height:1.3;
+  }
+  .agent-card .status{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    margin-top:8px;
+    font-size:11px;
+    color:var(--text-muted);
+  }
+  .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--up);
+  }
+  .dot.busy{background:var(--gold);}
+  .agent-detail{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .3s ease;
+    font-size:11.5px;
+    color:var(--text-muted);
+    text-align:left;
+    margin-top:0;
+  }
+  .agent-card.open .agent-detail{
+    max-height:120px;
+    margin-top:8px;
+  }
+
+  /* data panels */
+  .data-section{margin-bottom:40px;}
+  .data-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .data-head h3{
+    font-size:13px;
+    color:var(--text-muted);
+    font-weight:600;
+    margin:0;
+  }
+  .data-controls{
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .data-controls select{
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:var(--radius-sm);
+    padding:8px 10px;
+    font-family:inherit;
+    font-size:13px;
+  }
+  .data-controls button{
+    background:var(--teal);
+    color:#0c1b1a;
+    border:none;
+    border-radius:var(--radius-sm);
+    padding:8px 14px;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .data-controls button:hover{background:#71b7b2;}
+  .data-controls button:disabled{opacity:.5; cursor:default;}
+  .data-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  .data-card{
+    grid-column:span 1;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:18px;
+    min-height:150px;
+  }
+  .data-card.wide{grid-column:span 2;}
+  .data-card .card-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:12px;
+  }
+  .data-card .card-title .as-of{
+    font-size:11px;
+    color:var(--text-muted);
+    font-weight:400;
+    font-variant-numeric:tabular-nums;
+  }
+  .data-empty{
+    font-size:13px;
+    color:var(--text-muted);
+  }
+  .news-item{
+    padding:10px 0;
+    border-top:1px solid var(--border);
+  }
+  .news-item:first-child{border-top:none; padding-top:0;}
+  .news-item .src{
+    font-size:11.5px;
+    color:var(--gold);
+    font-weight:600;
+  }
+  .news-item .tone{
+    display:inline-block;
+    width:6px;height:6px;
+    border-radius:50%;
+    margin-right:6px;
+  }
+  .news-item .tone.positive{background:var(--up);}
+  .news-item .tone.negative{background:var(--down);}
+  .news-item .tone.neutral{background:var(--text-muted);}
+  .news-item .summary{
+    font-size:13.5px;
+    color:#c9cedd;
+    margin-top:4px;
+  }
+  .rate-value{
+    font-family:'Fraunces',serif;
+    font-size:32px;
+    font-weight:500;
+    font-variant-numeric:tabular-nums;
+  }
+  .rate-note{
+    font-size:13px;
+    color:#c9cedd;
+    margin-top:6px;
+  }
+  .rate-source{
+    font-size:11.5px;
+    color:var(--text-muted);
+    margin-top:10px;
+  }
+  .chart-wrap{
+    position:relative;
+    height:180px;
+  }
+  .chart-meta{
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+    font-size:11.5px;
+    color:var(--text-muted);
+  }
+  .confidence-badge{
+    display:inline-block;
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:2px 8px;
+    font-size:11px;
+  }
+  .confidence-badge.low{color:var(--down);}
+  .confidence-badge.medium{color:var(--gold);}
+  .confidence-badge.high{color:var(--up);}
+  .skeleton-line{
+    height:12px;
+    background:var(--surface-alt);
+    border-radius:4px;
+    margin-bottom:8px;
+    animation:pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:.5;}
+    50%{opacity:1;}
+  }
+  @media (max-width:640px){
+    .data-grid{grid-template-columns:1fr;}
+    .data-card.wide{grid-column:span 1;}
+  }
+
+  /* feed */
+  .feed{margin-bottom:40px;}
+  .feed-list{
+    border-left:1px solid var(--border);
+    padding-left:20px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  .feed-item{position:relative;}
+  .feed-item::before{
+    content:'';
+    position:absolute;
+    left:-24.5px;
+    top:5px;
+    width:8px;height:8px;
+    border-radius:50%;
+    background:var(--surface-alt);
+    border:1px solid var(--border);
+  }
+  .feed-item.ceo::before{background:var(--gold); border-color:var(--gold);}
+  .feed-head{
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+    font-size:13px;
+    margin-bottom:2px;
+  }
+  .feed-who{font-weight:600;}
+  .feed-time{color:var(--text-muted); font-size:12px; font-variant-numeric:tabular-nums;}
+  .feed-text{font-size:14px; color:#c9cedd;}
+
+  /* command bar */
+  .command{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    padding:20px;
+  }
+  .command-row{
+    display:flex;
+    gap:10px;
+  }
+  .command input{
+    flex:1;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:var(--radius-sm);
+    padding:11px 14px;
+    color:var(--text);
+    font-size:14px;
+    font-family:inherit;
+  }
+  .command input:focus{outline:none; border-color:var(--teal);}
+  .command button{
+    background:var(--gold);
+    color:#1a1204;
+    border:none;
+    border-radius:var(--radius-sm);
+    padding:0 20px;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .command button:hover{background:#d4ae67;}
+  .command button.ghost{
+    background:transparent;
+    color:var(--text-muted);
+    border:1px solid var(--border);
+  }
+  .command button.ghost:hover{border-color:var(--teal); color:var(--teal);}
+  .command-hint{
+    margin-top:10px;
+    font-size:12px;
+    color:var(--text-muted);
+  }
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:14px;
+  }
+  footer.note{
+    margin-top:36px;
+    font-size:12px;
+    color:var(--text-muted);
+    border-top:1px solid var(--border);
+    padding-top:16px;
+  }
+
+  @media (max-width:720px){
+    .agents-row{grid-template-columns:repeat(3,1fr);}
+    .connector-h{display:none;}
+  }
+  @media (max-width:480px){
+    .agents-row{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <div>
+      <div class="brand">Trading <span>Desk</span></div>
+      <p>ทีมเทรด AI ที่แบ่งงานกันทำ แล้วให้ CEO สรุปสิ่งที่สำคัญมาหาคุณ</p>
+    </div>
+    <div class="clock" id="clock"></div>
+  </header>
+
+  <div class="memo" id="memo">
+    <div class="memo-top">
+      <span class="memo-tag">แจ้งเตือนจาก CEO</span>
+      <span class="memo-time" id="memo-time">ตัวอย่าง</span>
+    </div>
+    <h2>ตัวอย่างหน้าตาบันทึกแจ้งเตือน — <span class="pair">ยังไม่มีข้อมูลจริง</span></h2>
+    <p class="body">กด "ดึงข้อมูลล่าสุด" ในส่วนข้อมูลของแต่ละทีมด้านล่าง แล้ว CEO จะอ่านรายงานจริงจากทีมข่าว/ทีมราคา/ทีมแนวโน้ม แล้วสรุปมาแทนที่ข้อความนี้โดยอัตโนมัติ</p>
+    <div class="memo-sources"></div>
+  </div>
+
+  <section class="org">
+    <h3>โครงสร้างทีม</h3>
+    <div class="ceo-card">
+      <div class="role">หัวหน้าทีม (CEO)</div>
+      <div class="desc">ตรวจทานรายงานจากทุกคน ตัดสินใจ และสรุปมาหาคุณ</div>
+    </div>
+    <div class="connector"></div>
+    <div class="connector-h"></div>
+    <div class="agents-row">
+
+      <div class="agent-branch">
+        <div class="connector"></div>
+        <div class="agent-card" data-detail="ติดตามข่าวเศรษฐกิจ ตัวเลขสำคัญ และอารมณ์ตลาดแบบเรียลไทม์">
+          <div class="role">นักวิเคราะห์ข่าว</div>
+          <div class="status"><span class="dot"></span>รายงานล่าสุดแล้ว</div>
+          <div class="agent-detail"></div>
+        </div>
+      </div>
+
+      <div class="agent-branch">
+        <div class="connector"></div>
+        <div class="agent-card" data-detail="สแกนคู่เงินทั้งหมด คัดเฉพาะคู่ที่เข้าเงื่อนไขความผันผวนและสภาพคล่อง">
+          <div class="role">นักคัดกรองคู่เงิน</div>
+          <div class="status"><span class="dot"></span>รายงานล่าสุดแล้ว</div>
+          <div class="agent-detail"></div>
+        </div>
+      </div>
+
+      <div class="agent-branch">
+        <div class="connector"></div>
+        <div class="agent-card" data-detail="วิเคราะห์กราฟหาจังหวะเข้า-ออกที่แม่นยำในกรอบเวลาที่ตั้งไว้">
+          <div class="role">นักจับจังหวะเข้าซื้อ</div>
+          <div class="status"><span class="dot busy"></span>กำลังวิเคราะห์</div>
+          <div class="agent-detail"></div>
+        </div>
+      </div>
+
+      <div class="agent-branch">
+        <div class="connector"></div>
+        <div class="agent-card" data-detail="คำนวณจุดตัดขาดทุน จุดทำกำไร และขนาดล็อตตามความเสี่ยงที่ยอมรับได้">
+          <div class="role">ผู้จัดการความเสี่ยง</div>
+          <div class="status"><span class="dot"></span>รายงานล่าสุดแล้ว</div>
+          <div class="agent-detail"></div>
+        </div>
+      </div>
+
+      <div class="agent-branch">
+        <div class="connector"></div>
+        <div class="agent-card" data-detail="ส่งคำสั่งซื้อขายเข้าโบรกเกอร์ หลังได้รับการยืนยันจาก CEO หรือจากคุณ">
+          <div class="role">เจ้าหน้าที่ส่งคำสั่ง</div>
+          <div class="status"><span class="dot"></span>รอคำสั่ง</div>
+          <div class="agent-detail"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="data-section" id="data-section">
+    <div class="data-head">
+      <h3>ข้อมูลของแต่ละทีม (ราคาสด + ค้นข่าวจริง)</h3>
+      <div class="data-controls">
+        <select id="pair-select">
+          <option value="EUR/USD">EUR/USD</option>
+          <option value="GBP/JPY" selected>GBP/JPY</option>
+          <option value="USD/JPY">USD/JPY</option>
+          <option value="AUD/USD">AUD/USD</option>
+          <option value="GBP/USD">GBP/USD</option>
+          <option value="USD/CAD">USD/CAD</option>
+        </select>
+        <button id="refresh-data">ดึงข้อมูลล่าสุด</button>
+      </div>
+    </div>
+    <div class="data-grid">
+      <div class="data-card" id="news-card">
+        <div class="card-title"><span>นักวิเคราะห์ข่าว</span><span class="as-of" id="news-asof"></span></div>
+        <div id="news-body" class="data-empty">กด "ดึงข้อมูลล่าสุด" เพื่อให้ทีมนี้ค้นข่าวที่เกี่ยวข้องกับคู่เงินที่เลือก</div>
+      </div>
+      <div class="data-card" id="rate-card">
+        <div class="card-title"><span>นักคัดกรองคู่เงิน</span><span class="as-of" id="rate-asof"></span></div>
+        <div id="rate-body" class="data-empty">กด "ดึงข้อมูลล่าสุด" เพื่อดูอัตราแลกเปลี่ยนโดยประมาณ</div>
+      </div>
+      <div class="data-card wide" id="chart-card">
+        <div class="card-title"><span>นักจับจังหวะเข้าซื้อ — แนวโน้มโดยประมาณ</span><span class="as-of" id="chart-asof"></span></div>
+        <div id="chart-body" class="data-empty">กด "ดึงข้อมูลล่าสุด" เพื่อดูแนวโน้มราคาช่วงที่ผ่านมา</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="feed">
+    <h3>รายงานล่าสุด</h3>
+    <div class="feed-list" id="feed-list">
+      <div class="feed-item">
+        <div class="feed-head"><span class="feed-who">นักวิเคราะห์ข่าว</span><span class="feed-time">09:40</span></div>
+        <div class="feed-text">ตัวเลขเศรษฐกิจสหรัฐฯ ออกมาตามคาด ไม่มีปัจจัยกระทบรุนแรงในช่วงนี้</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-head"><span class="feed-who">นักคัดกรองคู่เงิน</span><span class="feed-time">09:41</span></div>
+        <div class="feed-text">GBP/JPY มีความผันผวนเพิ่มขึ้น เข้าเกณฑ์ที่ตั้งไว้ ส่งต่อให้ทีมจับจังหวะ</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-head"><span class="feed-who">นักจับจังหวะเข้าซื้อ</span><span class="feed-time">09:42</span></div>
+        <div class="feed-text">พบสัญญาณเข้าซื้อที่กรอบเวลา 15 นาที ความมั่นใจระดับปานกลางถึงสูง</div>
+      </div>
+      <div class="feed-item">
+        <div class="feed-head"><span class="feed-who">ผู้จัดการความเสี่ยง</span><span class="feed-time">09:42</span></div>
+        <div class="feed-text">กำหนด SL 35 pip / TP 70 pip เสี่ยงไม่เกิน 1% ของพอร์ต</div>
+      </div>
+      <div class="feed-item ceo">
+        <div class="feed-head"><span class="feed-who">CEO</span><span class="feed-time">09:42</span></div>
+        <div class="feed-text">สรุปแล้วและส่งแจ้งเตือนถึงคุณด้านบน รอการยืนยันก่อนส่งคำสั่งจริง</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="command">
+    <h3>สั่งงาน CEO โดยตรง</h3>
+    <div class="command-row">
+      <input type="text" id="cmd-input" placeholder="เช่น ตรวจสอบ USD/JPY ตอนนี้หน่อย">
+      <button id="cmd-send">ส่ง</button>
+    </div>
+    <div class="toolbar">
+      <span class="command-hint" id="cmd-hint">คุยกับ CEO ได้แบบเรียลไทม์เลย — ไม่จำเป็นต้องสั่งทุกครั้ง เพราะ CEO จะทักมาเองเมื่อลูกทีมเจอจังหวะที่น่าสนใจ</span>
+      <button class="ghost" id="simulate-btn">จำลองการแจ้งเตือนใหม่</button>
+    </div>
+  </section>
+
+  <footer class="note">
+    อัตราแลกเปลี่ยนและกราฟแนวโน้มมาจาก Twelve Data จริง (รายชั่วโมง ไม่ใช่ tick แบบวินาทีต่อวินาที) ส่วนข่าวมาจากการค้นเว็บจริงของ AI ตอนที่คุณกดปุ่ม "รายงานล่าสุด" กับผู้จัดการความเสี่ยง/เจ้าหน้าที่ส่งคำสั่ง ยังเป็นข้อมูลตัวอย่างที่ยังไม่ได้เชื่อมบัญชีเทรดจริง คีย์ API ทั้งหมดถูกเก็บไว้ที่ฝั่งเซิร์ฟเวอร์ ไม่หลุดออกมาที่เบราว์เซอร์
+  </footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+  // live clock
+  function tick(){
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('clock').textContent = hh+':'+mm+' น.';
+  }
+  tick(); setInterval(tick, 30000);
+
+  // expand agent detail on click
+  document.querySelectorAll('.agent-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const wasOpen = card.classList.contains('open');
+      document.querySelectorAll('.agent-card.open').forEach(c=>{
+        if(c!==card){ c.classList.remove('open'); }
+      });
+      card.classList.toggle('open');
+      const detail = card.querySelector('.agent-detail');
+      if(!detail.textContent){ detail.textContent = card.getAttribute('data-detail'); }
+    });
+  });
+
+  // command bar -> appends a feed item pretending CEO relayed it
+  const feedList = document.getElementById('feed-list');
+  function addFeedItem(who, text, isCeo){
+    const now = new Date();
+    const time = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    const item = document.createElement('div');
+    item.className = 'feed-item' + (isCeo ? ' ceo' : '');
+    item.innerHTML = '<div class="feed-head"><span class="feed-who">'+who+'</span><span class="feed-time">'+time+'</span></div><div class="feed-text">'+text+'</div>';
+    feedList.appendChild(item);
+    item.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  let chatHistory = [];
+  let dataCache = {}; // { [pair]: { news, rate, trend, timestamp } }
+
+  function buildContextBlock(pair){
+    const cached = dataCache[pair];
+    if(!cached) return '';
+    const parts = [];
+    if(cached.news) parts.push('ข่าว: ' + JSON.stringify(cached.news.items || []));
+    if(cached.rate) parts.push('อัตราแลกเปลี่ยน: ' + JSON.stringify(cached.rate));
+    if(cached.trend) parts.push('แนวโน้ม: ' + JSON.stringify(cached.trend));
+    if(parts.length === 0) return '';
+    return `\n\n[ข้อมูลล่าสุดที่ทีมดึงมาสำหรับ ${pair} เมื่อ ${cached.timestamp}]\n` + parts.join('\n');
+  }
+
+  async function askCeo(userText){
+    const pair = document.getElementById('pair-select').value;
+    const context = buildContextBlock(pair);
+    chatHistory.push({ role: "user", content: userText + context });
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: chatHistory })
+    });
+    if(!response.ok){
+      const detail = await response.text().catch(()=> '');
+      throw new Error("API request failed (" + response.status + "): " + detail.slice(0,200));
+    }
+    const data = await response.json();
+    const text = data.text || "";
+    chatHistory.push({ role: "assistant", content: text || "..." });
+    return text || "ขอโทษครับ ตอบไม่ได้ในตอนนี้ ลองใหม่อีกครั้ง";
+  }
+
+  function setSending(isSending){
+    const btn = document.getElementById('cmd-send');
+    const input = document.getElementById('cmd-input');
+    btn.disabled = isSending;
+    input.disabled = isSending;
+    btn.textContent = isSending ? '...' : 'ส่ง';
+  }
+
+  async function handleSend(){
+    const input = document.getElementById('cmd-input');
+    const val = input.value.trim();
+    if(!val) return;
+    addFeedItem('คุณ', val, false);
+    input.value = '';
+    setSending(true);
+    try{
+      const reply = await askCeo(val);
+      addFeedItem('CEO', reply, true);
+    }catch(err){
+      console.error('CEO chat error:', err);
+      addFeedItem('CEO', 'ขอโทษครับ ตอนนี้ติดต่อไม่ได้ ลองส่งอีกครั้งได้เลย', true);
+    }finally{
+      setSending(false);
+    }
+  }
+
+  document.getElementById('cmd-send').addEventListener('click', handleSend);
+  document.getElementById('cmd-input').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ handleSend(); }
+  });
+
+  // memo box: CEO synthesizes a real alert from the data the team actually fetched
+  function updateMemoUI(pair, headline, body, sourcesList){
+    const memo = document.getElementById('memo');
+    memo.querySelector('h2').innerHTML = headline;
+    memo.querySelector('.body').textContent = body;
+    const now = new Date();
+    document.getElementById('memo-time').textContent = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    const chipsWrap = memo.querySelector('.memo-sources');
+    chipsWrap.innerHTML = sourcesList.map(s => '<span class="src-chip">'+escapeHtml(s)+'</span>').join('');
+    memo.classList.add('enter');
+    requestAnimationFrame(()=>{ memo.classList.remove('enter'); });
+  }
+
+  async function generateCeoMemo(pair){
+    const cached = dataCache[pair];
+    if(!cached || (!cached.news && !cached.rate && !cached.trend)){
+      updateMemoUI(
+        pair,
+        'ยังไม่มีข้อมูลให้สรุปสำหรับ <span class="pair">'+escapeHtml(pair)+'</span>',
+        'กด "ดึงข้อมูลล่าสุด" ในส่วนข้อมูลของแต่ละทีมด้านล่างก่อน แล้ว CEO จะสรุปแจ้งเตือนจากรายงานจริงของทีมให้',
+        []
+      );
+      return;
+    }
+    const contributedBy = [];
+    if(cached.news) contributedBy.push('นักวิเคราะห์ข่าว');
+    if(cached.rate) contributedBy.push('นักคัดกรองคู่เงิน');
+    if(cached.trend) contributedBy.push('นักจับจังหวะเข้าซื้อ');
+
+    try{
+      const response = await fetch("/api/memo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pair, context: buildContextBlock(pair) })
+      });
+      if(!response.ok){
+        const detail = await response.text().catch(()=> '');
+        throw new Error("API request failed (" + response.status + "): " + detail.slice(0,200));
+      }
+      const result = await response.json();
+      updateMemoUI(
+        pair,
+        escapeHtml(result.headline || 'สรุปข้อมูลล่าสุด') + ' — <span class="pair">'+escapeHtml(pair)+'</span>',
+        result.body || '',
+        contributedBy.map(s => 'อ้างอิงจาก'+s)
+      );
+      addFeedItem('CEO', 'สรุปข้อมูลล่าสุดของ '+pair+' เป็นบันทึกแจ้งเตือนด้านบนแล้ว', true);
+    }catch(err){
+      console.error('memo generation error:', err);
+      addFeedItem('CEO', 'สรุปบันทึกแจ้งเตือนไม่สำเร็จ: ' + err.message, true);
+    }
+  }
+
+  document.getElementById('simulate-btn').textContent = 'ให้ CEO สรุปแจ้งเตือนจากข้อมูลล่าสุด';
+  document.getElementById('simulate-btn').addEventListener('click', ()=>{
+    const pair = document.getElementById('pair-select').value;
+    generateCeoMemo(pair);
+  });
+
+  // ---- team data panels: now fetched from our own backend (/api/news, /api/rate, /api/trend) ----
+  // The backend holds the real API keys (Anthropic + Twelve Data) so they never reach the browser.
+
+  async function fetchFromBackend(path, pair){
+    const response = await fetch(path + '?pair=' + encodeURIComponent(pair));
+    const data = await response.json().catch(()=> ({}));
+    if(!response.ok){
+      throw new Error(data.error || ("API request failed (" + response.status + ")"));
+    }
+    return data;
+  }
+
+  function nowLabel(){
+    const now = new Date();
+    return String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  }
+
+  function cacheSet(pair, key, value){
+    if(!dataCache[pair]) dataCache[pair] = {};
+    dataCache[pair][key] = value;
+    dataCache[pair].timestamp = nowLabel();
+  }
+
+  function showStaleFallback(body, pair, key, emptyMsg){
+    const cached = dataCache[pair] && dataCache[pair][key];
+    if(cached){
+      body.dataset.stale = 'true';
+      return cached;
+    }
+    body.innerHTML = '<div class="data-empty">' + emptyMsg + '</div>';
+    return null;
+  }
+
+  // News Analyst
+  async function refreshNews(pair){
+    const body = document.getElementById('news-body');
+    showSkeleton(body);
+    try{
+      const result = await fetchFromBackend('/api/news', pair);
+      cacheSet(pair, 'news', result);
+      document.getElementById('news-asof').textContent = 'ค้นเมื่อ ' + nowLabel();
+      const items = result.items || [];
+      if(items.length === 0){
+        body.innerHTML = '<div class="data-empty">ไม่พบข่าวที่เกี่ยวข้องชัดเจนในตอนนี้</div>';
+        return;
+      }
+      body.innerHTML = items.map(it => `
+        <div class="news-item">
+          <span class="src">${escapeHtml(it.source || 'ไม่ระบุแหล่ง')}</span>
+          <div class="summary"><span class="tone ${escapeHtml(it.tone || 'neutral')}"></span>${escapeHtml(it.summary || '')}</div>
+        </div>
+      `).join('');
+    }catch(err){
+      console.error('news fetch error:', err);
+      const fallback = showStaleFallback(body, pair, 'news', 'ดึงข่าวไม่สำเร็จ: ' + escapeHtml(err.message || String(err)));
+      if(fallback){
+        document.getElementById('news-asof').textContent = 'ค่าล่าสุดที่เคยดึงได้ (เมื่อ ' + dataCache[pair].timestamp + ') — ครั้งนี้ดึงใหม่ไม่สำเร็จ';
+        const items = fallback.items || [];
+        body.innerHTML = items.map(it => `
+          <div class="news-item">
+            <span class="src">${escapeHtml(it.source || 'ไม่ระบุแหล่ง')}</span>
+            <div class="summary"><span class="tone ${escapeHtml(it.tone || 'neutral')}"></span>${escapeHtml(it.summary || '')}</div>
+          </div>
+        `).join('');
+      }
+    }
+  }
+
+  // Pair Screener (rate)
+  async function refreshRate(pair){
+    const body = document.getElementById('rate-body');
+    showSkeleton(body);
+    try{
+      const result = await fetchFromBackend('/api/rate', pair);
+      cacheSet(pair, 'rate', result);
+      document.getElementById('rate-asof').textContent = 'ค้นเมื่อ ' + nowLabel();
+      body.classList.remove('data-empty');
+      const rateDisplay = (result.rate === null || result.rate === undefined) ? '—' : result.rate;
+      body.innerHTML = `
+        <div class="rate-value">${escapeHtml(String(rateDisplay))}</div>
+        <div class="rate-note">${escapeHtml(result.change_note || '')}</div>
+        <div class="rate-source">อ้างอิง: ${escapeHtml(result.source || 'ไม่ระบุ')}</div>
+      `;
+    }catch(err){
+      console.error('rate fetch error:', err);
+      const fallback = showStaleFallback(body, pair, 'rate', 'ดึงอัตราแลกเปลี่ยนไม่สำเร็จ: ' + escapeHtml(err.message || String(err)));
+      if(fallback){
+        document.getElementById('rate-asof').textContent = 'ค่าล่าสุดที่เคยดึงได้ (เมื่อ ' + dataCache[pair].timestamp + ') — ครั้งนี้ดึงใหม่ไม่สำเร็จ';
+        const rateDisplay = (fallback.rate === null || fallback.rate === undefined) ? '—' : fallback.rate;
+        body.innerHTML = `
+          <div class="rate-value">${escapeHtml(String(rateDisplay))}</div>
+          <div class="rate-note">${escapeHtml(fallback.change_note || '')}</div>
+          <div class="rate-source">อ้างอิง: ${escapeHtml(fallback.source || 'ไม่ระบุ')}</div>
+        `;
+      }
+    }
+  }
+
+  // Entry Timing (trend chart)
+  let trendChart = null;
+  function renderTrendChart(points){
+    const ctx = document.getElementById('trend-canvas').getContext('2d');
+    if(trendChart){ trendChart.destroy(); }
+    trendChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: points.map(p => p.label),
+        datasets: [{
+          data: points.map(p => p.value),
+          borderColor: '#5fa8a3',
+          backgroundColor: 'rgba(95,168,163,0.12)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: '#9aa5bc', font: { size: 11 } }, grid: { color: '#2d3b56' } },
+          y: { ticks: { color: '#9aa5bc', font: { size: 11 } }, grid: { color: '#2d3b56' } }
+        }
+      }
+    });
+  }
+  async function refreshTrend(pair){
+    const body = document.getElementById('chart-body');
+    showSkeleton(body);
+    try{
+      const result = await fetchFromBackend('/api/trend', pair);
+      cacheSet(pair, 'trend', result);
+      const points = result.points || [];
+      document.getElementById('chart-asof').textContent = 'ค้นเมื่อ ' + nowLabel();
+      body.classList.remove('data-empty');
+      if(points.length === 0){
+        body.innerHTML = '<div class="data-empty">ยังหาข้อมูลแนวโน้มที่ชัดเจนไม่ได้: ' + escapeHtml(result.note || '') + '</div>';
+        return;
+      }
+      body.innerHTML = `
+        <div class="chart-wrap"><canvas id="trend-canvas"></canvas></div>
+        <div class="chart-meta">
+          <span>${escapeHtml(result.note || '')} · อ้างอิง: ${escapeHtml(result.source || 'ไม่ระบุ')}</span>
+          <span class="confidence-badge ${escapeHtml(result.confidence || 'low')}">ความเชื่อมั่น: ${escapeHtml(result.confidence || 'low')}</span>
+        </div>
+      `;
+      renderTrendChart(points);
+    }catch(err){
+      console.error('trend fetch error:', err);
+      const fallback = showStaleFallback(body, pair, 'trend', 'ดึงข้อมูลแนวโน้มไม่สำเร็จ: ' + escapeHtml(err.message || String(err)));
+      if(fallback){
+        const points = fallback.points || [];
+        document.getElementById('chart-asof').textContent = 'ค่าล่าสุดที่เคยดึงได้ (เมื่อ ' + dataCache[pair].timestamp + ') — ครั้งนี้ดึงใหม่ไม่สำเร็จ';
+        if(points.length === 0){
+          body.innerHTML = '<div class="data-empty">ยังหาข้อมูลแนวโน้มที่ชัดเจนไม่ได้</div>';
+          return;
+        }
+        body.innerHTML = `
+          <div class="chart-wrap"><canvas id="trend-canvas"></canvas></div>
+          <div class="chart-meta">
+            <span>${escapeHtml(fallback.note || '')} · อ้างอิง: ${escapeHtml(fallback.source || 'ไม่ระบุ')}</span>
+            <span class="confidence-badge ${escapeHtml(fallback.confidence || 'low')}">ความเชื่อมั่น: ${escapeHtml(fallback.confidence || 'low')}</span>
+          </div>
+        `;
+        renderTrendChart(points);
+      }
+    }
+  }
+
+  function escapeHtml(str){
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  let refreshCooldown = false;
+  document.getElementById('refresh-data').addEventListener('click', async () => {
+    if(refreshCooldown) return;
+    const btn = document.getElementById('refresh-data');
+    const pair = document.getElementById('pair-select').value;
+    btn.disabled = true;
+    btn.textContent = 'กำลังดึงข้อมูล...';
+    await Promise.allSettled([
+      refreshNews(pair),
+      refreshRate(pair),
+      refreshTrend(pair)
+    ]);
+    await generateCeoMemo(pair);
+    btn.textContent = 'ดึงข้อมูลล่าสุด';
+    // กันสแปมกดรัวๆ ซึ่งจะยิง API ซ้ำเกินจำเป็นและเสี่ยงโดน rate limit
+    refreshCooldown = true;
+    let secondsLeft = 8;
+    const interval = setInterval(() => {
+      secondsLeft -= 1;
+      if(secondsLeft <= 0){
+        clearInterval(interval);
+        btn.disabled = false;
+        refreshCooldown = false;
+        btn.textContent = 'ดึงข้อมูลล่าสุด';
+      }else{
+        btn.textContent = 'รออีก ' + secondsLeft + ' วิ';
+      }
+    }, 1000);
+  });
+</script>
+</body>
+</html>
